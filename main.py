@@ -6,9 +6,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, ContactForm
 from flask_gravatar import Gravatar
 from functools import wraps
+import smtplib
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ksdaskjhdjkshd23213123'
@@ -192,9 +193,27 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/contact")
+@app.route("/contact", methods=["GET", "POST"])
 def contact():
-    return render_template("contact.html")
+    form = ContactForm()
+    if request.method == "POST":
+        name = form.name.data
+        email = form.email.data
+        phone = form.phone.data
+        message = form.message.data
+        # my_email = "b.temirow@yahoo.com"
+        # my_password = "kxhppsoetdxehkwl"
+        # with smtplib.SMTP("smtp.mail.yahoo.com") as connection:
+        #     connection.starttls()
+        #     connection.login(user=my_email, password=my_password)
+        #     connection.sendmail(
+        #         from_addr=my_email,
+        #         to_addrs="bakytbek.temirov@yahoo.com",
+        #         msg=f"Subject: From{name}, Phone: {phone}\n\n{message}"
+        #     )
+        return render_template("contact.html", form=None)
+
+    return render_template("contact.html", form=form)
 
 
 @app.route("/new-post", methods=["GET", "POST"])
@@ -248,6 +267,7 @@ def delete_post(post_id):
     db.session.delete(post_to_delete)
     db.session.commit()
     return redirect(url_for('get_all_posts'))
+
 
 @app.route("/delete_comment/<int:comment_id>")
 def delete_comment(comment_id):

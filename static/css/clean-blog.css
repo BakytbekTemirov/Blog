@@ -40,6 +40,7 @@ a:focus, a:hover {
 
 blockquote {
   font-style: italic;
+  font-style: italic;
   color: #868e96;
 }
 
@@ -242,7 +243,7 @@ img::-moz-selection {
 }
 
 header.masthead {
-  margin-bottom: 50px;
+  margin-bottom: 20px;
   background: no-repeat center center;
   background-color: #868e96;
   background-attachment: scroll;
@@ -282,7 +283,7 @@ header.masthead .site-heading {
 
 header.masthead .page-heading h1,
 header.masthead .site-heading h1 {
-  font-size: 50px;
+  font-size: 10px;
   margin-top: 0;
 }
 
