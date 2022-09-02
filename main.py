@@ -47,7 +47,7 @@ def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         #If id is not 1 then return abort with 403 error
-        if current_user.id != 1:
+        if current_user.category != 1:
             return abort(403)
         #Otherwise continue with the route function
         return f(*args, **kwargs)
@@ -61,9 +61,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     name = db.Column(db.String(100))
-
-    # This will act like a List of BlogPost objects attached to each User.
-    # The "author" refers to the author property in the BlogPost class.
+    category = db.Column(db.Integer, nullable=False)
     posts = relationship("BlogPost", back_populates="author")
     comments = relationship("Comment", back_populates="comment_author")
 
@@ -71,18 +69,16 @@ class User(UserMixin, db.Model):
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
     id = db.Column(db.Integer, primary_key=True)
-
     # Create Foreign Key, "users.id" the users refers to the tablename of User.
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     # Create reference to the User object, the "posts" refers to the posts protperty in the User class.
     author = relationship("User", back_populates="posts")
-
     title = db.Column(db.String(250), unique=True, nullable=False)
     subtitle = db.Column(db.String(250), nullable=False)
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    img_url = db.Column(db.String(250), nullable=False)
     comments = relationship("Comment", back_populates="parent_post")
+
 
 class Comment(db.Model):
     __tablename__= "comments"
@@ -90,7 +86,6 @@ class Comment(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     parent_post = relationship("BlogPost", back_populates="comments")
-    # Create reference   to the User object, the "posts" refers to the posts protperty in the User class.
     comment_author = relationship("User", back_populates="comments")
     text = db.Column(db.Text, nullable=False)
 
@@ -120,15 +115,21 @@ def register():
             salt_length=8
         )
 
+        if request.form.get("email") == "bakytbek.temirov@yahoo.com":
+            category = 1
+        else:
+            category = 0
+
         new_user = User(
             name=request.form.get("name"),
             email=request.form.get("email"),
-            password=hash_and_salted_password
+            password=hash_and_salted_password,
+            category=category
         )
 
         db.session.add(new_user)
         db.session.commit()
-
+        login_user(new_user)
         return redirect(url_for("get_all_posts"))
 
     return render_template("register.html", form=register_form)
@@ -227,7 +228,6 @@ def add_new_post():
             title=form.title.data,
             subtitle=form.subtitle.data,
             body=form.body.data,
-            img_url=form.img_url.data,
             author=current_user,
             date=date.today().strftime("%B %d, %Y")
         )
@@ -245,15 +245,11 @@ def edit_post(post_id):
     edit_form = CreatePostForm(
         title=post.title,
         subtitle=post.subtitle,
-        img_url=post.img_url,
-        author=post.author,
         body=post.body
     )
     if edit_form.validate_on_submit():
         post.title = edit_form.title.data
         post.subtitle = edit_form.subtitle.data
-        post.img_url = edit_form.img_url.data
-        post.author = edit_form.author.data
         post.body = edit_form.body.data
         db.session.commit()
         return redirect(url_for("show_post", post_id=post.id))

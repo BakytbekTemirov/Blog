@@ -11,7 +11,7 @@
   <title>Bakytbek's Blog</title>
 
   <!--  Favicon-->
-  <link rel="icon" type="image/x-icon" href="static/img/favicon.ico">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 
   <!-- Bootstrap core CSS -->
   <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -41,23 +41,24 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('get_all_posts') }}">Home</a>
           </li>
-          {% if not current_user.is_authenticated: %}
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
-          </li>
-          {% endif %}
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}">Log Out</a>
-          </li>
-    
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('about') }}">About</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('contact') }}">Contact</a>
+          {% if not current_user.is_authenticated: %}
+          <li class="nav-item">
+            <a class="reg nav-link" href="{{ url_for('login') }}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="reg nav-link" href="{{ url_for('register') }}">Register</a>
+          </li>
+          {% endif %}
+          {% if current_user.is_authenticated: %}
+          <li class="nav-item">
+            <a class="reg nav-link" href="{{ url_for('logout') }}">Log Out</a>
+          </li>
+          {% endif %}
           </li>
         </ul>
       </div>
