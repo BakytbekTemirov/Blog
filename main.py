@@ -18,7 +18,7 @@ ckeditor = CKEditor(app)
 Bootstrap(app)
 
 ##CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL_1", "sqlite:///blog.db")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///blog.db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -90,7 +90,7 @@ class Comment(db.Model):
     text = db.Column(db.Text, nullable=False)
 
 
-#db.create_all()
+db.create_all()
 
 @app.route('/')
 def get_all_posts():
@@ -103,25 +103,25 @@ def register():
     register_form = RegisterForm()
     if request.method == "POST":
 
-        if User.query.filter_by(email=request.form.get('email')).first():
+        if User.query.filter_by(email=request.form.get('email').strip()).first():
             # User already exists
             flash("You've already signed up with that email, log in instead!")
             return redirect(url_for('login'))
 
         hash_and_salted_password = generate_password_hash(
-            request.form.get("password"),
+            request.form.get("password").strip(),
             method='pbkdf2:sha256',
             salt_length=8
         )
 
-        if request.form.get("email") == "bakytbek.temirov@yahoo.com":
+        if request.form.get("email").strip() == "bakytbek.temirov@yahoo.com":
             category = 1
         else:
             category = 0
 
         new_user = User(
-            name=request.form.get("name"),
-            email=request.form.get("email"),
+            name=request.form.get("name").strip(),
+            email=request.form.get("email").strip(),
             password=hash_and_salted_password,
             category=category
         )
@@ -138,8 +138,8 @@ def register():
 def login():
     login_form = LoginForm()
     if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
+        email = request.form.get("email").strip()
+        password = request.form.get("password").strip()
 
         #check if user in database
         user = User.query.filter_by(email=email).first()
@@ -279,4 +279,4 @@ def delete_comment(comment_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=8080)
